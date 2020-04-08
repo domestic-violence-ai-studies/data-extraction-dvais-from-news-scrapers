@@ -17,7 +17,7 @@ MongoClient.connect(url, async function (err, db) {
 
   console.log("Starting search with violencia de genero words")
 
-  const words =["violencia género", "violencia machista", "machismo", "violencia contra las mujeres", "acoso sexual", "violación"]
+  const words =["violencia género", "violencia machista", "violencia doméstica", "discriminación mujer", "sexismo", "violencia contra las mujeres", "acoso sexual", "violación"]
 
   const queryFromWord = (word) => {
     return {"$text":{"$search": '\"' + word + '\"'}}
@@ -26,7 +26,7 @@ MongoClient.connect(url, async function (err, db) {
   const searchPromisified = (query) => {
     return new Promise((resolve, reject)=>{
       dbo.collection("NewsContentScraped").find(query).toArray(function (err, result) {
-        if (err) reject(err)
+        if (err) return reject(err)
         return resolve(result);
       })
     })
@@ -36,11 +36,14 @@ MongoClient.connect(url, async function (err, db) {
   
   for (const word of words) {
     const resultsSearch = await searchPromisified(queryFromWord(word))
+    console.log("---")
+    console.log(word + " " + resultsSearch.length)
     results.push(...resultsSearch)
   }
 
   const resultsMap = new Map()
   for (const result of results) {
+    result["about_domestic_violence"]=1
     resultsMap.set(result._id, result)
   }
 
@@ -49,12 +52,11 @@ MongoClient.connect(url, async function (err, db) {
   
 
   let data = JSON.stringify(results);
-  let dataNoRepetition = JSON.stringify(noRepetitionResults);
-  fs.writeFileSync(pathoutbundle + "news-domestic-violence.json", data);
-  fs.writeFileSync(pathoutbundle + "no_rep_news-domestic-violence.json", dataNoRepetition);
+  let dataNoRepetitionDomesticViolence = JSON.stringify(noRepetitionResults);
+  fs.writeFileSync(pathoutbundle + "no_rep_news-domestic-violence.json", dataNoRepetitionDomesticViolence);
 
-
-  console.log("Starting search with no")
+  console.log("----------------")
+  console.log("Starting search with no domestic violence words")
 
 
   //  { $match : { newspaper : "elpais" } },
@@ -72,10 +74,13 @@ MongoClient.connect(url, async function (err, db) {
   }
 
   resultsNoViolencia = await searchAggragatePromisified()
+  for (const result of resultsNoViolencia) {
+    result["about_domestic_violence"]=0
+  }
+
+  console.log("found " + resultsNoViolencia.length)
   let dataNoViolence = JSON.stringify(resultsNoViolencia);
   fs.writeFileSync(pathoutbundle + "no_rep_news-domestic-no-violence.json", dataNoViolence);
-
-
 
 
   db.close();
