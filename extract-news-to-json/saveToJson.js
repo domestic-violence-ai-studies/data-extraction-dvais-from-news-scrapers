@@ -92,7 +92,7 @@ MongoClient.connect(url, async function (err, db) {
   const depuredListResultsNoViolencia = []
 
   for (const result of resultsNoViolencia) {
-    if (!aboutDv(result)){
+    if (result && !aboutDv(result)){
       result["about_domestic_violence"]=0
       depuredListResultsNoViolencia.push(result)
     } else {
