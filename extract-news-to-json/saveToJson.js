@@ -81,7 +81,7 @@ MongoClient.connect(url, async function (err, db) {
 
   const aboutDv = (result) => {
     for (const word of words){
-      if (result.tags_concat_for_text_search.indexOf(word)>-1){
+      if (result.tags_concat_for_text_search && result.tags_concat_for_text_search.indexOf(word)>-1){
         console.log("removed new from list because talks about " + word)
         return true
       }
