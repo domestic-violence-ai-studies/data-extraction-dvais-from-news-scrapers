@@ -55,7 +55,6 @@ MongoClient.connect(url, async function (err, db) {
   const noRepertitionLength = noRepetitionResults.length
   
 
-  let data = JSON.stringify(results);
   let dataNoRepetitionDomesticViolence = JSON.stringify(noRepetitionResults);
   fs.writeFileSync(pathoutbundle + "no_rep_news-domestic-violence.json", dataNoRepetitionDomesticViolence);
 
@@ -66,7 +65,7 @@ MongoClient.connect(url, async function (err, db) {
   //  { $match : { newspaper : "elpais" } },
   //  { $sample : { size: 3 } }
   //]
-  const query = [{ $match : {} }, { $sample : { size: noRepertitionLength } }]
+  const query = [{ $match : {} }, { $sample : { size: 2*noRepertitionLength } }]
 
   const searchAggragatePromisified = () => {
     return new Promise((resolve, reject)=>{
@@ -78,12 +77,34 @@ MongoClient.connect(url, async function (err, db) {
   }
 
   resultsNoViolencia = await searchAggragatePromisified()
-  for (const result of resultsNoViolencia) {
-    result["about_domestic_violence"]=0
+
+
+  const aboutDv = (result) => {
+    for (const word of words){
+      if (result.tags_concat_for_text_search.indexOf(word)>-1){
+        console.log("removed new from list because talks about " + word)
+        return true
+      }
+      return false
+    }
   }
 
-  console.log("found " + resultsNoViolencia.length)
-  let dataNoViolence = JSON.stringify(resultsNoViolencia);
+  const depuredListResultsNoViolencia = []
+
+  for (const result of resultsNoViolencia) {
+    if (!aboutDv(result)){
+      result["about_domestic_violence"]=0
+      depuredListResultsNoViolencia.push(result)
+    } else {
+      result["about_domestic_violence"]=1
+    }
+    
+  }
+
+  console.log("no violence: found " + depuredListResultsNoViolencia.length)
+  console.log("violence found " + noRepetitionResults.length)
+
+  let dataNoViolence = JSON.stringify(depuredListResultsNoViolencia);
   fs.writeFileSync(pathoutbundle + "no_rep_news-domestic-no-violence.json", dataNoViolence);
 
 
