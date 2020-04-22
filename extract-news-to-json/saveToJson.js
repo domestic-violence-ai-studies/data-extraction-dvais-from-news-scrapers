@@ -19,8 +19,8 @@ MongoClient.connect(url, async function (err, db) {
 
   const words =["violencia género", "violencia machista", "violencia doméstica", 
   "discriminación mujer", "sexismo", "violencia contra las mujeres", "mujeres asesinadas", 
-  "mujer asesinada", "feminicidio", "abosos sexuales", "agresiones sexuales", "acoso sexual", 
-  "violencia sexual", "abuso sexual", "violencia ostétrica", "acoso",
+  "mujer asesinada", "feminicidio", "abusos sexuales", "agresión sexual", "agresion sexual","agresiones sexuales", "acoso sexual", "acosos sexuales",
+  "violencia sexual", "abuso sexual", "violencia ostétrica", "maltrato psicológico", "maltrato físico", "malos tratos",
   "violación"]
 
   const queryFromWord = (word) => {
